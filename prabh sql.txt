@@ -1,0 +1,420 @@
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 2
+Server version: 10.1.21-MariaDB mariadb.org binary distribution
+
+Copyright (c) 2000, 2016, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| test               |
++--------------------+
+2 rows in set (0.00 sec)
+
+MariaDB [(none)]> use test;
+Database changed
+MariaDB [test]> create table CityMaster(
+    -> CityID integer(4) primary key,
+    -> cityName varchar(255) default'toronto'
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+MariaDB [test]> create table persons(
+    -> ID integer(3),
+    -> LastName varchar(255) NOT NULL,
+    -> FirstName Varchar(255),
+    -> Age integer(3),
+    -> CityID integer(4),
+    -> constraint pk_persons primary key(ID),
+    -> constraint ck_persons check(age>=18),
+    -> constraint fk_persons foreign key(CityID)
+    -> references CityMaster(CityID)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+MariaDB [test]> shoe table;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'shoe table' at line 1
+MariaDB [test]> show table;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| persons        |
++----------------+
+2 rows in set (0.01 sec)
+
+MariaDB [test]> create table cust as select * from customers;
+ERROR 1146 (42S02): Table 'test.customers' doesn't exist
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| persons        |
++----------------+
+2 rows in set (0.00 sec)
+
+MariaDB [test]> create table pers as select * from persons;
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc persons;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  | MUL | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   |     | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> select* from pers;
+Empty set (0.00 sec)
+
+MariaDB [test]> create table p2 as select * from persons where personID<5;
+ERROR 1054 (42S22): Unknown column 'personID' in 'where clause'
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| pers           |
+| persons        |
++----------------+
+3 rows in set (0.00 sec)
+
+MariaDB [test]> create table p2 like persons;
+Query OK, 0 rows affected (0.02 sec)
+
+MariaDB [test]> desc persons;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  | MUL | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> desc p2;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  | MUL | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| p2             |
+| pers           |
+| persons        |
++----------------+
+4 rows in set (0.00 sec)
+
+MariaDB [test]> insert into p2 select * from persons where customerID>5;
+ERROR 1054 (42S22): Unknown column 'customerID' in 'where clause'
+MariaDB [test]> insert into p2 select * from persons where personsID>5;
+ERROR 1054 (42S22): Unknown column 'personsID' in 'where clause'
+MariaDB [test]> show table p2;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'p2' at line 1
+MariaDB [test]> select * from p2;
+Empty set (0.00 sec)
+
+MariaDB [test]> desc p2;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  | MUL | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table p2 add column country varchar
+    -> (100);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc p2;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  | MUL | NULL    |       |
+| country   | varchar(100) | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+6 rows in set (0.02 sec)
+
+MariaDB [test]> desc CityMaster;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| CityID   | int(4)       | NO   | PRI | NULL    |       |
+| cityName | varchar(255) | YES  |     | toronto |       |
++----------+--------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+MariaDB [test]> alter table CityMaster add column state varchar (50);
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc CityMaster;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| CityID   | int(4)       | NO   | PRI | NULL    |       |
+| cityName | varchar(255) | YES  |     | toronto |       |
+| state    | varchar(50)  | YES  |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+MariaDB [test]> alter table CityMaster modify column state varchar (30);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc CityMaster;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| CityID   | int(4)       | NO   | PRI | NULL    |       |
+| cityName | varchar(255) | YES  |     | toronto |       |
+| state    | varchar(30)  | YES  |     | NULL    |       |
++----------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+MariaDB [test]> alter table CityMaster drop column state;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc CityMaster;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| CityID   | int(4)       | NO   | PRI | NULL    |       |
+| cityName | varchar(255) | YES  |     | toronto |       |
++----------+--------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   |     | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table pers add primary key (ID);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table pers modify CityID integer(4);
+Query OK, 0 rows affected (0.00 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table pers add constraint unique (Age);
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | NO   |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  | UNI | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table pers modify LastName varchar(255);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | YES  |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  | UNI | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> alter table pers drop index Age ;
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | YES  |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> show index from pers;
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| pers  |          0 | PRIMARY  |            1 | ID          | A         |           0 |     NULL | NULL   |      | BTREE      |         |               |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+1 row in set (0.00 sec)
+
+MariaDB [test]> alter table pers add constraint unique Age;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '' at line 1
+MariaDB [test]> alter table pers add constraint unique (Age);
+Query OK, 0 rows affected (0.20 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> drop index Age on pers;
+Query OK, 0 rows affected (0.01 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+MariaDB [test]> desc pers;
++-----------+--------------+------+-----+---------+-------+
+| Field     | Type         | Null | Key | Default | Extra |
++-----------+--------------+------+-----+---------+-------+
+| ID        | int(3)       | NO   | PRI | NULL    |       |
+| LastName  | varchar(255) | YES  |     | NULL    |       |
+| FirstName | varchar(255) | YES  |     | NULL    |       |
+| Age       | int(3)       | YES  |     | NULL    |       |
+| CityID    | int(4)       | YES  |     | NULL    |       |
++-----------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+MariaDB [test]> show index from pers;
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| pers  |          0 | PRIMARY  |            1 | ID          | A         |           0 |     NULL | NULL   |      | BTREE      |         |               |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+1 row in set (0.00 sec)
+
+MariaDB [test]> select * from pers;
+Empty set (0.00 sec)
+
+MariaDB [test]> update pers set name="prabh" where ID=4;
+ERROR 1054 (42S22): Unknown column 'name' in 'field list'
+MariaDB [test]> delete from pers where ID= 4;
+Query OK, 0 rows affected (0.00 sec)
+
+MariaDB [test]> drop table pers;
+Query OK, 0 rows affected (0.01 sec)
+
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| p2             |
+| persons        |
++----------------+
+3 rows in set (0.00 sec)
+
+MariaDB [test]> create table manu(
+    -> Code integer(3) primary key,
+    -> Name varchar (50)not null
+    -> );
+ERROR 27 (HY000): Can't sync file '.\test\manu.frm' to disk (Errcode: 22 "Invalid argument")
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| p2             |
+| persons        |
++----------------+
+3 rows in set (0.00 sec)
+
+MariaDB [test]> show tables;
++----------------+
+| Tables_in_test |
++----------------+
+| citymaster     |
+| p2             |
+| persons        |
++----------------+
+3 rows in set (0.00 sec)
+
+MariaDB [test]> create table manu(
+    ->     Code integer(3) primary key,
+    ->     Name varchar (50)not null
+    ->     );
+ERROR 27 (HY000): Can't sync file '.\test\manu.frm' to disk (Errcode: 22 "Invalid argument")
+MariaDB [test]>
+MariaDB [test]> create table manu(
+    ->     Code integer(3) primary key,
+    ->     Name varchar(50)not null
+    ->     );
+ERROR 27 (HY000): Can't sync file '.\test\manu.frm' to disk (Errcode: 22 "Invalid argument")
+MariaDB [test]>
